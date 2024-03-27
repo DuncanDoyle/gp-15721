@@ -1,0 +1,24 @@
+apiVersion: security.policy.gloo.solo.io/v2
+kind: WAFPolicy
+metadata:
+  annotations:
+    cluster.solo.io/cluster: ""
+  name: break-some-waf
+  namespace: default
+spec:
+  applyToRoutes:
+  - route:
+      labels:
+        route: httpbin
+  config:
+    customInterventionMessage: custom-intervention-message
+    customRuleSets:
+    - ruleStr: |
+        # disable ruleid 930100 - TP-414237 - Path Traversal Attack (/../)
+        # Note the underscore in this configuration, which is a malformed WAF policy, resulting in bad config being served to Envoy.
+        _
+        SecRuleRemoveById 124234
+        SecRuleRemoveById 228932
+        SecRuleRemoveById 490101
+    disableCoreRuleSet: true
+    priority: 0

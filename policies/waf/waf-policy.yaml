@@ -1,0 +1,21 @@
+apiVersion: security.policy.gloo.solo.io/v2
+kind: WAFPolicy
+metadata:
+  annotations:
+    cluster.solo.io/cluster: ""
+  name: break-some-waf
+  namespace: default
+spec:
+  applyToRoutes:
+  - route:
+      labels:
+        route: httpbin
+  config:
+    customInterventionMessage: 'ModSecurity intervention! Custom message details here..'
+    customRuleSets:
+    - ruleStr: |
+        # Turn rule engine on
+        SecRuleEngine On
+        SecRule REQUEST_HEADERS:agent "scammer" "deny,status:418,id:107,phase:1,msg:'blocked scammer'" 
+    disableCoreRuleSet: true
+    priority: 0

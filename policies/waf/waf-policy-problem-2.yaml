@@ -1,0 +1,23 @@
+apiVersion: security.policy.gloo.solo.io/v2
+kind: WAFPolicy
+metadata:
+  annotations:
+    cluster.solo.io/cluster: ""
+  name: break-some-waf
+  namespace: default
+spec:
+  applyToRoutes:
+  - route:
+      labels:
+        route: httpbin
+  config:
+    customInterventionMessage: custom-intervention-message
+    customRuleSets:
+    - ruleStr: |
+        # Turn rule engine on
+        SecRuleEngine On
+        # Note the "." instead of "," between the CIDR ranges.
+        # SecRule REMOTE_ADDR "!@ipMatch 173.245.48.0/20,103.21.244.0/22" "phase:1,deny,status:403,id:1,msg:'block ip'"
+        SecRule REMOTE_ADDR "!@ipMatch 173.245.48.0/20.103.21.244.0/22" "phase:1,deny,status:403,id:1,msg:'block ip'"
+    disableCoreRuleSet: true
+    priority: 0
